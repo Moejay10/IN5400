@@ -83,7 +83,6 @@ class KNearestNeighbor(object):
             diff = X[i] - self.X_train[j]
             dists[i,j] = np.sqrt(np.dot(diff,diff))
 
-    pass
 
 
     #########################################################################
@@ -120,9 +119,7 @@ class KNearestNeighbor(object):
       # Hint: Look up the function numpy.argsort.                             #
       #########################################################################
 
-      #closest_y = []
-
-      pass
+      closest_y[0] = self.y_train[np.argsort(dists[i])][0:k]
 
 
 
@@ -134,7 +131,8 @@ class KNearestNeighbor(object):
       # label.                                                                #
       #########################################################################
 
-      #y_pred[i] = []...
+      counts = np.bincount(closest_y[0])
+      y_pred[i] = np.argmax(counts)
 
       #########################################################################
       #                           END OF YOUR CODE                            #
