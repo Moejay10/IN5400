@@ -57,7 +57,7 @@ def initialization(conf):
         n_neurons_prev = conf['layer_dimensions'][i]
         n_neurons_next = conf['layer_dimensions'][i+1]
         params["W_"+ str(i+1)] = np.sqrt(sigma2)*np.random.randn(n_neurons_prev, n_neurons_next) + mu
-        params["b_"+ str(i+1)] = np.zeros((n_neurons_prev, 1))
+        params["b_"+ str(i+1)] = np.zeros((n_neurons_next, 1))
 
 
 
@@ -164,7 +164,6 @@ def forward(conf, X_batch, params, is_training):
     for l in range(1, n_layers-1):
         features['A_' + str(l)] = activation(features['Z_' + str(l)], 'relu')
         features['Z_' + str(l+1)] = np.dot(params['W_' + str(l+1)].T, features['A_' + str(l)]) + params['b_' + str(l+1)]
-        print(np.dot(params['W_' + str(l+1)].T, features['A_' + str(l)]) + params['b_' + str(l+1)])
 
     Y_proposed = softmax(features['Z_' + str(n_layers-1)])
     return Y_proposed, features
@@ -183,8 +182,12 @@ def cross_entropy_cost(Y_proposed, Y_reference):
         num_correct: Scalar integer
     """
     # TODO: Task 1.3
-    cost = None
-    num_correct = None
+
+    m = Y_reference.shape[0]
+    n = Y_reference.shape[1]
+    cost = - float(1/m)* np.ones(ny)
+    num_correct = 0
+
 
     return cost, num_correct
 
