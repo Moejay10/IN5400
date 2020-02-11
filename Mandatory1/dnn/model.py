@@ -1,7 +1,7 @@
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::#
 #                                                                               #
 # Part of mandatory assignment 1 in                                             #
-# IN5400 - Machine Learning for Image analysis                                  #
+# IN5400 - Machine Learning for Image Analysis                                  #
 # University of Oslo                                                            #
 #                                                                               #
 #                                                                               #
@@ -44,9 +44,29 @@ def initialization(conf):
                 the network.
     """
     # TODO: Task 1.1
-    params = None
+    params = {}
+
+    n_layers = len(conf['layer_dimensions'])
+
+    mu = 0
+
+
+    # Weights and Biases
+    for i in range(0, n_layers-1):
+        sigma2 = float(2/conf['layer_dimensions'][i])
+        n_neurons_prev = conf['layer_dimensions'][i]
+        n_neurons_next = conf['layer_dimensions'][i+1]
+        params["W_"+ str(i+1)] = np.sqrt(sigma2)*np.random.randn(n_neurons_prev, n_neurons_next) + mu
+        params["b_"+ str(i+1)] = np.zeros((n_neurons_prev, 1))
+
+
+
 
     return params
+
+
+def RelU(Z):
+    return (Z>0)*Z
 
 
 def activation(Z, activation_function):
@@ -59,7 +79,7 @@ def activation(Z, activation_function):
     """
     # TODO: Task 1.2 a)
     if activation_function == 'relu':
-        return None
+        return RelU(Z)
     else:
         print("Error: Unimplemented activation function: {}", activation_function)
         return None
@@ -79,7 +99,37 @@ def softmax(Z):
         numpy array of floats with shape [n, m]
     """
     # TODO: Task 1.2 b)
-    return None
+
+    Z_copy = Z.copy()
+
+    # Normalization trick to avoid numerical instability,
+    # Trick 1
+    Z_copy -= np.max(Z_copy, axis=0, keepdims=True) # max of every sample
+
+    # Compute loss (and add to it, divided later).
+    # Denominator of softmax function.
+    sum_Z_copy = np.sum(np.exp(Z_copy), axis=0, keepdims=True)
+
+    # Computing log(softnmax)
+    # Numerator - denominator of sotmax function
+    # Trick 2.
+    log_p = Z_copy - np.log(sum_Z_copy)
+
+    # The softmax for all classes C
+    loss = np.exp(log_p)
+
+    # Sum up crossentropy loss of the sample i
+    # to become N samples minibatch crossentropy loss
+    # for each class C
+    #loss = np.sum(p, axis=1, keepdims=True)
+    #loss = np.exp(f)/sum_f
+
+
+    #############################################################################
+    #                          END OF YOUR CODE                                 #
+    #############################################################################
+
+    return loss
 
 
 def forward(conf, X_batch, params, is_training):
@@ -104,9 +154,19 @@ def forward(conf, X_batch, params, is_training):
                We cache them in order to use them when computing gradients in the backpropagation.
     """
     # TODO: Task 1.2 c)
-    Y_proposed = None
-    features = None
 
+    n_layers = len(conf['layer_dimensions'])
+
+    features = {}
+
+    features['Z_' + str(1)] = np.dot(params['W_' + str(1)].T, X_batch) + params['b_' + str(1)]
+
+    for l in range(1, n_layers-1):
+        features['A_' + str(l)] = activation(features['Z_' + str(l)], 'relu')
+        features['Z_' + str(l+1)] = np.dot(params['W_' + str(l+1)].T, features['A_' + str(l)]) + params['b_' + str(l+1)]
+        print(np.dot(params['W_' + str(l+1)].T, features['A_' + str(l)]) + params['b_' + str(l+1)])
+
+    Y_proposed = softmax(features['Z_' + str(n_layers-1)])
     return Y_proposed, features
 
 
