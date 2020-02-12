@@ -183,11 +183,17 @@ def cross_entropy_cost(Y_proposed, Y_reference):
     """
     # TODO: Task 1.3
 
-    m = Y_reference.shape[0]
-    n = Y_reference.shape[1]
-    cost = - float(1/m)* np.ones(ny)
-    num_correct = 0
+    n = Y_reference.shape[0]
+    m = Y_reference.shape[1]
+    n_vector = np.ones((n,1))
+    m_vector = np.ones((m,1))
+    Hadamard_Y = Y_reference * np.log(Y_proposed)
+    cost = - float(1/m)* np.dot(np.dot(n_vector.T, Hadamard_Y), m_vector)
 
+    proposed = np.argmax(Y_proposed, axis=0)
+    reference = np.argmax(Y_reference, axis=0)
+
+    num_correct = np.sum(proposed == reference)
 
     return cost, num_correct
 
