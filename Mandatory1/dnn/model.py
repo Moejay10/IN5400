@@ -208,7 +208,10 @@ def activation_derivative(Z, activation_function):
     """
     # TODO: Task 1.4 a)
     if activation_function == 'relu':
-        return None
+        # Heaviside step-function as the derivative of the ReLu activation
+        Z[Z >= 0] = 1
+        Z[Z < 0 ] = 0
+        return Z
     else:
         print("Error: Unimplemented derivative of activation function: {}", activation_function)
         return None
@@ -232,7 +235,23 @@ def backward(conf, Y_proposed, Y_reference, params, features):
                 - the gradient of the biases grad_b^[l] for l in [1, L].
     """
     # TODO: Task 1.4 b)
-    grad_params = None
+    grad_params = {}
+    error = {}
+    n = Y_reference.shape[0]
+    m = Y_reference.shape[1]
+    m_vector = np.ones((m,1))
+    n_layers = len(conf['layer_dimensions'])
+    # error in the output layer
+    error['Jz_' + str(n_layers-1)] = Y_proposed - Y_reference
+    for l in reversed(range(1, n_layers)):
+        # gradients for output & hidden layer
+        grad_params['grad_W_' + str(l)] = float(1/m)*np.dot(features['A_' + str(l-1)], error['Jz_' + str(l)].T)
+        grad_params['grad_b_' + str(l)] = float(1/m)*np.dot(error['Jz_' + str(l)], m_vector)
+        # error in the hidden layer
+        if l != 1:
+            error['Jz_' + str(l-1)] = activation_derivative(features['Z_' + str(l-1)], 'relu') * np.dot(params['W_' + str(l)], error['Jz_' + str(l)])
+
+
     return grad_params
 
 
@@ -248,5 +267,15 @@ def gradient_descent_update(conf, params, grad_params):
         params: Updated parameter dictionary.
     """
     # TODO: Task 1.5
-    updated_params = None
+
+    updated_params = {}
+    #n_layers = len(conf['layer_dimensions']) # Cannot use this in exercise 1.5
+    n_layers = int(len(params.items())/2 + 1)
+    learning_rate = conf['learning_rate']
+
+    for l in range(1, n_layers):
+        updated_params['W_' + str(l)] = params['W_' + str(l)] - learning_rate*grad_params['grad_W_' + str(l)]
+        updated_params['b_' + str(l)] = params['b_' + str(l)] - learning_rate*grad_params['grad_b_' + str(l)]
+
+
     return updated_params
