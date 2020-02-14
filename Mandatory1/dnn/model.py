@@ -66,7 +66,14 @@ def initialization(conf):
 
 
 def RelU(Z):
+    """
+    f(x) = x , x => 0
+    f(x) = 0 , x < 0
+    """
     return (Z>0)*Z
+
+def sigmoid(Z):
+    return 1./(1.+np.exp(-Z))
 
 
 def activation(Z, activation_function):
@@ -80,6 +87,10 @@ def activation(Z, activation_function):
     # TODO: Task 1.2 a)
     if activation_function == 'relu':
         return RelU(Z)
+
+    elif activation_function == 'sigmoid':
+        return sigmoid(Z)
+        
     else:
         print("Error: Unimplemented activation function: {}", activation_function)
         return None
@@ -156,16 +167,38 @@ def forward(conf, X_batch, params, is_training):
     # TODO: Task 1.2 c)
 
     n_layers = len(conf['layer_dimensions'])
-
+    output = {}
     features = {}
 
-    features['Z_' + str(1)] = np.dot(params['W_' + str(1)].T, X_batch) + params['b_' + str(1)]
+    #Test
+    output['A_0'] = X_batch
+    output['Z_' + str(1)] = np.dot(params['W_' + str(1)].T, output['A_0']) + params['b_' + str(1)]
+
+    #Training
+    # Input layer
+    if is_training:
+        features['A_0'] = X_batch
+        features['Z_' + str(1)] = np.dot(params['W_' + str(1)].T, features['A_0']) + params['b_' + str(1)]
 
     for l in range(1, n_layers-1):
-        features['A_' + str(l)] = activation(features['Z_' + str(l)], 'relu')
-        features['Z_' + str(l+1)] = np.dot(params['W_' + str(l+1)].T, features['A_' + str(l)]) + params['b_' + str(l+1)]
+        #Test
+        output['A_' + str(l)] = activation(output['Z_' + str(l)], 'relu')
+        output['Z_' + str(l+1)] = np.dot(params['W_' + str(l+1)].T, output['A_' + str(l)]) + params['b_' + str(l+1)]
 
-    Y_proposed = softmax(features['Z_' + str(n_layers-1)])
+        #Training
+        # Store linear combinations on output neurons for later use in backprogation.
+        if is_training:
+            features['A_' + str(l)] = activation(features['Z_' + str(l)], 'relu')
+            features['Z_' + str(l+1)] = np.dot(params['W_' + str(l+1)].T, features['A_' + str(l)]) + params['b_' + str(l+1)]
+
+
+    # Output layer
+    Y_proposed = softmax(output['Z_' + str(n_layers-1)])
+
+    #Training
+    if is_training:
+        features['A_' + str(n_layers-1)] = Y_proposed
+
     return Y_proposed, features
 
 
@@ -223,6 +256,7 @@ def backward(conf, Y_proposed, Y_reference, params, features):
     Args:
         conf: Configuration dictionary.
         Y_proposed: numpy array of floats with shape [n_y, m].
+        X_batch: float numpy array with shape [n^[0], batch_size]. Input image batch.
         features: Dictionary with matrices from the forward propagation. Contains
                 - the linear combinations Z^[l] = W^[l]a^[l-1] + b^[l] for l in [1, L].
                 - the activations A^[l] = activation(Z^[l]) for l in [1, L].
@@ -243,6 +277,7 @@ def backward(conf, Y_proposed, Y_reference, params, features):
     n_layers = len(conf['layer_dimensions'])
     # error in the output layer
     error['Jz_' + str(n_layers-1)] = Y_proposed - Y_reference
+
     for l in reversed(range(1, n_layers)):
         # gradients for output & hidden layer
         grad_params['grad_W_' + str(l)] = float(1/m)*np.dot(features['A_' + str(l-1)], error['Jz_' + str(l)].T)
