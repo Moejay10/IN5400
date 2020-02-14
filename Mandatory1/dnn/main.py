@@ -84,6 +84,11 @@ def plot_progress(train_progress, devel_progress, out_filename=None):
     ax1.legend(loc='lower left', bbox_to_anchor=(0.6, 0.52), framealpha=1.0)
 
     ax2 = ax1.twinx()
+    # Reshaping the data
+    length = len(train_progress['cost'])
+    train_progress['cost'] = np.array(train_progress['cost'])
+    train_progress['cost']= np.reshape(train_progress['cost'], (length,1))
+
     ax2.plot(train_progress['steps'], train_progress['cost'], 'g', label='Training set cost')
     ax2.set_ylabel('Cross entropy cost')
     gl2 = ax2.get_ygridlines()
