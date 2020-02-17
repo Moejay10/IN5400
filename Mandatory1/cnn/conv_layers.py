@@ -14,6 +14,32 @@
 
 import numpy as np
 
+
+def conv_single_step(a_slice_prev, W, b):
+    """
+    Apply one filter defined by parameters W on a single slice (a_slice_prev) of the output activation
+    of the previous layer.
+
+    Arguments:
+    a_slice_prev -- slice of input data of shape (f, f, n_C_prev)
+    W -- Weight parameters contained in a window - matrix of shape (f, f, n_C_prev)
+    b -- Bias parameters contained in a window - matrix of shape (1, 1, 1)
+
+    Returns:
+    Z -- a scalar value, result of convolving the sliding window (W, b) on a slice x of the input data
+    """
+
+    ### START CODE HERE ### (≈ 2 lines of code)
+    # Element-wise product between a_slice and W. Do not add the bias yet.
+    s = np.multiply(a_slice_prev,W)
+    # Sum over all entries of the volume s.
+    Z = np.sum(s)
+    # Add bias b to Z. Cast b to a float() so that Z results in a scalar value.
+    Z = Z + b.astype(float)
+    ### END CODE HERE ###
+
+    return Z
+
 def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     """
     A naive implementation of the forward pass for a convolutional layer.
@@ -31,10 +57,44 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
         output_layer: The output layer with shape (batch_size, num_filters, height_y, width_y)
     """
     # TODO: Task 2.1
-    output_layer = None # Should have shape (batch_size, num_filters, height_y, width_y)
 
+
+    # Retrieve dimensions from input_layers shape (≈1 line)
     (batch_size, channels_x, height_x, width_x) = input_layer.shape
+    # Retrieve dimensions from W's shape (≈1 line)
     (num_filters, channels_w, height_w, width_w) = weight.shape
+
+    # Compute the dimensions of the output layer using the formula given in the lecture notes. Hint: use int() to floor. (≈2 lines)
+    height_out = int((height_x + 2*pad_size - height_w)/stride) + 1
+    width_out =int((width_x + 2*pad_size - width_w)/stride) + 1
+    channels_out = num_filters
+
+    # Initialize the output volume Z with zeros. (≈1 line)
+    output_layer = np.zeros([batch_size, channels_out, height_out, width_out]) # Should have shape (batch_size, num_filters, height_y, width_y)
+
+    #Pad with zeros all images of the dataset X. The padding is applied to the height and width of an image
+    # Create input_layer_pad by padding input_layer
+    Input_layer_pad = np.pad(input_layer, ((0,0), (pad_size,pad_size), (pad_size,pad_size), (0,0)), 'constant', constant_values = (0,0))
+
+    for i in range(batch_size):                        # loop over the batch of training examples
+        input_layer_pad = Input_layer_pad[i,:,:,:]     # Select ith training example's padded activation
+        for h in range(height_out):                           # loop over vertical axis of the output volume
+            for w in range(width_out):                       # loop over horizontal axis of the output volume
+                for c in range(channels_out):                   # loop over channels (= #filters) of the output volume
+
+                    # Find the corners of the current "slice" (≈4 lines)
+                    vert_start = h*stride
+                    vert_end = h*stride + height_w
+                    horiz_start = w*stride
+                    horiz_end = w*stride + width_w
+
+                    # Use the corners to define the (3D) slice of a_prev_pad (See Hint above the cell). (≈1 line)
+                    a_slice_prev = input_layer_pad[:, vert_start:vert_end, horiz_start:horiz_end]
+
+                    # Convolve the (3D) slice with the correct filter W and bias b, to get back one output neuron. (≈1 line)
+                    output_layer[i, h, w, c] = conv_single_step(a_slice_prev, weight[c, :, :, :], bias)
+
+    ### END CODE HERE ###
 
     assert channels_w == channels_x, (
         "The number of filter channels be the same as the number of input layer channels")
