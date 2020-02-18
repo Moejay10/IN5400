@@ -4,7 +4,7 @@ IN5400/IN9400 - Machine Learning for Image Analysis
 University of Oslo
 Spring 2020
 
-## Deadline 
+## Deadline
 Monday March 2 23:59, 2020
 
 
@@ -19,9 +19,9 @@ content follows.
 
 ## Important
 Note that this exercise is individual work. You are required to follow regulations for mandatory assignments at IFI.
-Your code will be checked against plagiarism. 
+Your code will be checked against plagiarism.
 
-Also note that you are required to implement the function in the code without using Pytorch or other prebuilt functions for network initialization or propagation. 
+Also note that you are required to implement the function in the code without using Pytorch or other prebuilt functions for network initialization or propagation.
 
 
 
@@ -114,3 +114,21 @@ In this file, predefined arrays are defined. To be used when checking your imple
 ### `cnn`
 
 In this folder, code related to the convolutional neural network implementations reside.
+
+## Resources
+
+### DNN
+
+
+### CNN
+
+#### Code:
+https://datascience-enthusiast.com/DL/Convolution_model_Step_by_Stepv2.html
+https://github.com/wiseodd/hipsternet/blob/master/hipsternet/neuralnet.py
+https://gist.github.com/JiaxiangZheng/a60cc8fe1bf6e20c1a41abc98131d518
+https://wiseodd.github.io/techblog/2016/07/16/convnet-conv-layer/
+
+#### Theory:
+http://cs231n.github.io/convolutional-networks/
+https://becominghuman.ai/only-numpy-implementing-convolutional-neural-network-using-numpy-deriving-forward-feed-and-back-458a5250d6e4
+https://victorzhou.com/blog/intro-to-cnns-part-1/
