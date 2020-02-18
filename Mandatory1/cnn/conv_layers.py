@@ -74,7 +74,7 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
 
     #Pad with zeros all images of the dataset X. The padding is applied to the height and width of an image
     # Create input_layer_pad by padding input_layer
-    Input_layer_pad = np.pad(input_layer, ((0,0), (pad_size,pad_size), (pad_size,pad_size), (0,0)), 'constant', constant_values = (0,0))
+    Input_layer_pad = np.pad(input_layer, ((0,), (0,), (pad_size,), (pad_size,)), mode="constant", constant_values=0)
 
     for i in range(batch_size):                        # loop over the batch of training examples
         input_layer_pad = Input_layer_pad[i,:,:,:]     # Select ith training example's padded activation
@@ -89,11 +89,17 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
                     horiz_end = w*stride + width_w
 
                     # Use the corners to define the (3D) slice of a_prev_pad (See Hint above the cell). (≈1 line)
-                    a_slice_prev = input_layer_pad[:, vert_start:vert_end, horiz_start:horiz_end]
+                    input_slice_prev = input_layer_pad[:, vert_start:vert_end, horiz_start:horiz_end]
+                    #print(input_slice_prev.shape)
 
+                    # Element-wise product between a_slice and W. Do not add the bias yet.
+                    s = (input_slice_prev * weight[c, :, :, :])
+                    # Sum over all entries of the volume s.
+                    Z = np.sum(s)
+                    # Add bias bias to Z. Get the corresponding bias to the filter so that Z results in a scalar value.
+                    Z = Z + bias[c]
                     # Convolve the (3D) slice with the correct filter W and bias b, to get back one output neuron. (≈1 line)
-                    output_layer[i, h, w, c] = conv_single_step(a_slice_prev, weight[c, :, :, :], bias)
-
+                    output_layer[i, c, h, w] = Z
     ### END CODE HERE ###
 
     assert channels_w == channels_x, (
