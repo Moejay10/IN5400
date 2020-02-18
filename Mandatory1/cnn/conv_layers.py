@@ -15,30 +15,6 @@
 import numpy as np
 
 
-def conv_single_step(a_slice_prev, W, b):
-    """
-    Apply one filter defined by parameters W on a single slice (a_slice_prev) of the output activation
-    of the previous layer.
-
-    Arguments:
-    a_slice_prev -- slice of input data of shape (f, f, n_C_prev)
-    W -- Weight parameters contained in a window - matrix of shape (f, f, n_C_prev)
-    b -- Bias parameters contained in a window - matrix of shape (1, 1, 1)
-
-    Returns:
-    Z -- a scalar value, result of convolving the sliding window (W, b) on a slice x of the input data
-    """
-
-    ### START CODE HERE ### (≈ 2 lines of code)
-    # Element-wise product between a_slice and W. Do not add the bias yet.
-    s = np.multiply(a_slice_prev,W)
-    # Sum over all entries of the volume s.
-    Z = np.sum(s)
-    # Add bias b to Z. Cast b to a float() so that Z results in a scalar value.
-    Z = Z + b.astype(float)
-    ### END CODE HERE ###
-
-    return Z
 
 def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     """
@@ -108,7 +84,7 @@ def conv_layer_forward(input_layer, weight, bias, pad_size=1, stride=1):
     return output_layer
 
 
-def conv_layer_backward(output_layer_gradient, input_layer, weight, bias, pad_size=1):
+def conv_layer_backward(output_layer_gradient, input_layer, weight, bias, pad_size=1, stride=1):
     """
     A naive implementation of the backward pass for a convolutional layer.
 
@@ -125,11 +101,55 @@ def conv_layer_backward(output_layer_gradient, input_layer, weight, bias, pad_si
         bias_gradient: Gradient of the loss L with respect to the biases b
     """
     # TODO: Task 2.2
-    input_layer_gradient, weight_gradient, bias_gradient = None, None, None
 
+    # Retrieve dimensions from output_layer_gradient shape
     batch_size, channels_y, height_y, width_y = output_layer_gradient.shape
+    # Retrieve dimensions from input_layer shape
     batch_size, channels_x, height_x, width_x = input_layer.shape
+    # Retrieve dimensions from weight shape
     num_filters, channels_w, height_w, width_w = weight.shape
+
+
+    # Initialize gradients of input_layer, weight & bias with the correct shapes
+    input_layer_gradient = np.zeros((batch_size, channels_x, height_x, width_x))
+    weight_gradient = np.zeros((num_filters, channels_w, height_w, width_w))
+    bias_gradient = np.zeros(bias.shape)
+
+    #Pad with zeros all images of the dataset X. The padding is applied to the height and width of an image
+    # Create input_layer_pad by padding input_layer
+    Input_layer_pad = np.pad(input_layer, ((0,), (0,), (pad_size,), (pad_size,)), mode="constant", constant_values=0)
+    Input_layer_gradient_pad = np.pad(input_layer_gradient, ((0,), (0,), (pad_size,), (pad_size,)), mode="constant", constant_values=0)
+
+    for i in range(batch_size):                       # loop over the training examples
+
+        # select ith training example from A_prev_pad and dA_prev_pad
+        input_layer_pad = Input_layer_pad[i]
+        input_layer_gradient_pad = Input_layer_gradient_pad[i]
+
+        for h in range(height_y):                  # loop over vertical axis of the output volume
+            for w in range(width_y):               # loop over horizontal axis of the output volume
+                for c in range(channels_y):        # loop over the channels of the output volume
+
+                    # Find the corners of the current "slice"
+                    vert_start = h
+                    vert_end = vert_start + height_w
+                    horiz_start = w
+                    horiz_end = horiz_start + width_w
+
+                    # Use the corners to define the slice from a_prev_pad
+                    input_layer_slice = input_layer_pad[:, vert_start:vert_end, horiz_start:horiz_end]
+
+                    # Element-wise product between a_slice and W. Do not add the bias yet.
+                    s1 = weight[c,:,:,:] * output_layer_gradient[i, c, h, w]
+                    s2 = input_layer_slice * output_layer_gradient[i, c, h, w]
+
+                    # Update gradients for the window and the filter's parameters using the code formulas given above
+                    input_layer_gradient_pad[:, vert_start:vert_end, horiz_start:horiz_end] += s1
+                    weight_gradient[c,:,:,:] += s2
+                    bias_gradient[c] += output_layer_gradient[i, c, h, w]
+
+        # Set the ith training example's dA_prev to the unpaded da_prev_pad (Hint: use X[pad:-pad, pad:-pad, :])
+        input_layer_gradient[i, :, :, :] = input_layer_gradient_pad[:, pad_size:-pad_size, pad_size:-pad_size]
 
     assert num_filters == channels_y, (
         "The number of filters must be the same as the number of output layer channels")
