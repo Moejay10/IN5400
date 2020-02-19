@@ -119,6 +119,8 @@ In this folder, code related to the convolutional neural network implementations
 
 ### DNN
 
+#### Code:
+https://github.com/ivartz/IN9400_exercises
 
 ### CNN
 
