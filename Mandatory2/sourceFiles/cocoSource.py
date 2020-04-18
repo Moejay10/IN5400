@@ -29,6 +29,7 @@ class imageCaptionModel(nn.Module):
         self.cell_type              = config['cellType']
 
         # TODO: Task 1e
+        
         self.Embedding = nn.Embedding(self.vocabulary_size, self.embedding_size)
 
         self.inputLayer = nn.Linear(self.number_of_cnn_features, self.hidden_state_sizes)
@@ -52,9 +53,11 @@ class imageCaptionModel(nn.Module):
             logits              : Shape[batch_size, truncated_backprop_length, vocabulary_size]
             current_hidden_state: shape[num_rnn_layers, batch_size, hidden_state_sizes]
         """
-        # ToDO
+        # TODO: Task 1e
         # Get "initial_hidden_state" shape[num_rnn_layers, batch_size, hidden_state_sizes].
         # Remember that each rnn cell needs its own initial state.
+        # use self.rnn to calculate "logits" and "current_hidden_state"
+
 
         if current_hidden_state is None:
             input_layer = torch.tanh(self.inputLayer(cnn_features))
@@ -62,8 +65,7 @@ class imageCaptionModel(nn.Module):
         else:
             initial_hidden_state = current_hidden_state
 
-        # use self.rnn to calculate "logits" and "current_hidden_state"
-        logits, current_hidden_state_out = self.rnn.forward(xTokens, initial_hidden_state, self.outputLayer, self.Embedding, is_train)
+        logits, current_hidden_state_out = self.rnn(xTokens, initial_hidden_state, self.outputLayer, self.Embedding, is_train)
 
         return logits, current_hidden_state_out
 
@@ -96,16 +98,13 @@ class RNN(nn.Module):
 
             self.cells = nn.ModuleList(cell)
 
-        elif self.cell_type == "GRU":
+        else:
+            self.cell_type == "GRU"
             cell = [GRUCell(hidden_state_size, input_size)]
             new_input_size = hidden_state_size
             cell.extend([GRUCell(hidden_state_size, new_input_size) for i in range(num_rnn_layers - 1)])  # Calculate current state by iterating through each cell
 
             self.cells = nn.ModuleList(cell)
-
-        else:
-            print("Error: Cell Type")
-
 
         return
 
@@ -137,46 +136,46 @@ class RNN(nn.Module):
         num_rnn_layers = list(initial_hidden_state.size())[0]
         batch_size = list(xTokens.size())[0]
 
-        embedding_vectors = Embedding(xTokens) # Getting input embedding vectors
+        input_embedding_vectors = Embedding(xTokens) # Getting input embedding vectors
 
         if is_train == True:
-            list_logits = []
+            list_logit = []
             for i in range(seqLen):                     # Iterates through all 30 potential words
-                state_old = embedding_vectors[:, i, :]  # Get the embedding vector for the correct input word
+                state_old = input_embedding_vectors[:, i, :]  # Get the embedding vector for the correct input word
+
                 for j in range(num_rnn_layers):         # Calculate current state by iterating through each cell
                     state_new = self.cells[j](state_old, current_states[j]) # Forward the cell
                     current_states[j] = state_new       # Store the previous current states of each layer
                     state_old= state_new                # Update the previous cell
 
                 logit = outputLayer(state_old)
-                list_logits.append(logit)           # Forward the final state of the recurrent layer time instance
+                list_logit.append(logit)           # Forward the final state of the recurrent layer time instance
                                                     # into a fully connected (dense) layer to get values that each can be
                                                     # interpreted as a "logistic unit" (logit) for prediction.
 
 
-            logits = torch.stack(list_logits, dim=1)        # Convert the logit values into tensor of size [batch_size, seqLen, vocabulary_size]
+            logits = torch.stack(list_logit, dim=1)         # Convert the logit values into tensor of size [batch_size, seqLen, vocabulary_size]
                                                             # containing the logit behind the predicted word for the entire reccurence
 
             current_state = torch.stack(current_states)     # Convert to the current_states of each layer into a tensor
 
-        else: # Not training
-            list_logits = []
-            state_old = embedding_vectors[:, 0, :]
+
+        else:                                               # Not training
+            list_logit = []
+            state_old = input_embedding_vectors[:, 0, :]    # The first recurrence input is the word embedding for the first word
             for i in range(seqLen):
                 for j in range(num_rnn_layers):
                     state_new = self.cells[j](state_old, current_states[j])
                     current_states[j] = state_new
                     state_old = state_new
+
                 logit = outputLayer(state_old)
-                list_logits.append(logit)
-                values, max_index = torch.max(logit, dim=1, keepdim=False)  # Predict the next word by locating the index of the word with the largest logit
-                                                                            # Done for each example in the batch.
+                list_logit.append(logit)
 
-                state_old = Embedding(max_index)                             # Each later input is an embedding of a  predicted word.
+                pred = torch.argmax(logit, dim=1)                       # Predict the next word by locating the index of the word with the largest logit
+                state_old = Embedding(pred)                             # Each later input is an embedding of a  predicted word.
 
-
-
-            logits = torch.stack(list_logits, dim=1)
+            logits = torch.stack(list_logit, dim=1)
             current_state = torch.stack(current_states)
 
         return logits, current_state
@@ -213,16 +212,18 @@ class GRUCell(nn.Module):
         self.input_size = input_size
 
         m = self.hidden_state_sizes + self.input_size
+        h = self.hidden_state_sizes
 
         # TODO: Task 1b
-        self.weight_u = torch.nn.Parameter(torch.randn(m, self.hidden_state_sizes)/np.sqrt(m))
-        self.bias_u   = nn.Parameter(torch.zeros(1, self.hidden_state_sizes))
 
-        self.weight_r = torch.nn.Parameter(torch.randn(m, self.hidden_state_sizes)/np.sqrt(m))
-        self.bias_r   = nn.Parameter(torch.zeros(1, self.hidden_state_sizes))
+        self.weight_u = torch.nn.Parameter(torch.randn(m, h)/np.sqrt(m))
+        self.bias_u   = nn.Parameter(torch.zeros(1, h))
 
-        self.weight = torch.nn.Parameter(torch.randn(m, self.hidden_state_sizes)/np.sqrt(m))
-        self.bias   = nn.Parameter(torch.zeros(1, self.hidden_state_sizes))
+        self.weight_r = torch.nn.Parameter(torch.randn(m, h)/np.sqrt(m))
+        self.bias_r   = nn.Parameter(torch.zeros(1, h))
+
+        self.weight = torch.nn.Parameter(torch.randn(m, h)/np.sqrt(m))
+        self.bias   = nn.Parameter(torch.zeros(1, h))
 
 
         return
@@ -239,15 +240,17 @@ class GRUCell(nn.Module):
         """
         # TODO: Task 1b
 
-        update_gate = torch.sigmoid(torch.mm(torch.cat((x, state_old), dim=1), self.weight_u) + self.bias_u)
+        temp = torch.cat((x, state_old), dim=1)
 
-        reset_gate = torch.sigmoid(torch.mm(torch.cat((x, state_old), dim=1), self.weight_r) + self.bias_r)
+        update_gate = torch.sigmoid(torch.mm(temp, self.weight_u) + self.bias_u)
 
-        candidate_cell = torch.tanh(torch.mm(torch.cat((x, reset_gate*state_old), dim=1), self.weight) + self.bias)
+        reset_gate = torch.sigmoid(torch.mm(temp, self.weight_r) + self.bias_r)
 
-        final_cell = update_gate*state_old + (1 - update_gate)*candidate_cell
+        temp2 = torch.cat((x, reset_gate*state_old), dim=1)
+        candidate_cell = torch.tanh(torch.mm(temp2, self.weight) + self.bias)
 
-        state_new = final_cell
+        # Final cell
+        state_new = update_gate*state_old + (1 - update_gate)*candidate_cell
 
         return state_new
 
@@ -273,11 +276,14 @@ class RNNCell(nn.Module):
         self.input_size = input_size
 
         m = self.hidden_state_size + self.input_size
+        h = self.hidden_state_size
+
 
          # TODO: Task 1a
-        self.weight = torch.nn.Parameter(torch.randn(m, self.hidden_state_size)/np.sqrt(m))
 
-        self.bias   = nn.Parameter(torch.zeros(1, self.hidden_state_size))
+        self.weight = torch.nn.Parameter(torch.randn(m, h)/np.sqrt(m))
+
+        self.bias   = nn.Parameter(torch.zeros(1, h))
 
         return
 
@@ -292,7 +298,8 @@ class RNNCell(nn.Module):
             state_new: The updated hidden state of the recurrent cell. Shape [batch_size, hidden_state_sizes]
 
         """
-        # TODO:
+        # TODO: Task 1a
+
         state_new = torch.tanh(torch.mm(torch.cat((x, state_old), dim=1), self.weight) + self.bias)
 
         return state_new
@@ -315,11 +322,12 @@ def loss_fn(logits, yTokens, yWeights):
     Tips:
         F.cross_entropy
     """
-    eps = 0.0000000001  # Used to not divide on zero
 
     # TODO: Task 1c
 
-    loss = F.cross_entropy(logits.permute(0, 2, 1), yTokens, reduction="none") # Finds the correct dimension and calculates the total loss
+    eps = 0.0000000001                                        # Used to not divide on zero
+    logit = torch.transpose(logits, 1, 2)                     # Transforms into correct dimension
+    loss = F.cross_entropy(logit, yTokens, reduction="none")  # Finds the correct dimension and calculates the total loss
     losses = torch.masked_select(loss, yWeights.eq(1))        # Loss for non-empty words
     sumLoss  = torch.sum(losses)                              # Sum of all non-empty words
     meanLoss = torch.mean(losses)                             # Mean of all non-empty words
