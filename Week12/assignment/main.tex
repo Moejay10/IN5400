@@ -1,0 +1,286 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+%\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+\documentclass[paper=a4, fontsize=11pt]{article} % A4 paper and 11pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+
+\usepackage{graphicx}
+\usepackage{listings} % Required for including snippets of code
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+%\usepackage{natbib}
+
+\usepackage{sectsty} % Allows customizing section commands
+%\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+% Norwegian caption name and reference names
+\crefname{figure}{fig.}{figs.}
+\Crefname{figure}{Fig.}{Figs.}
+\crefname{section}{sec.}{sec.}
+\Crefname{section}{Sec.}{Sec.}
+
+\addto\captionenglish{\renewcommand{\figurename}{Figur}}
+%\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+%----------------------------------------------------------------------------------------
+%	Listings
+%----------------------------------------------------------------------------------------
+
+\lstset{ %
+  basicstyle=\ttfamily\scriptsize, % the size of the fonts that are used for the code
+  columns=fixed,
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,	                   % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{myblue},     % keyword style
+  language=Python,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\color{myblack},      % the style that is used for the line-numbers
+  rulecolor=\color{myblack},       % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{myred},       % string literal style
+  tabsize=2,	                     % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  backgroundcolor=\color{mygray}   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
+}
+
+%----------------------------------------------------------------------------------------
+%	COLOR NAMES AND DEFINITIONS
+%----------------------------------------------------------------------------------------
+\definecolor{myblue}{HTML}{2a7fba}
+\definecolor{mygreen}{HTML}{46746e}
+\definecolor{mygray}{HTML}{f4f4f4}
+\definecolor{myred}{HTML}{fc5d2d}
+\definecolor{myblack}{HTML}{222222}
+
+%----------------------------------------------------------------------------------------
+% HYPERREFERENCES
+%----------------------------------------------------------------------------------------
+\hypersetup{%
+    %draft,	% = no hyperlinking at all (useful in b/w printouts)
+    colorlinks=true, linktocpage=true, pdfstartpage=3, pdfstartview=FitV,%
+    % uncomment the following line if you want to have black links (e.g., for printing)
+    %colorlinks=false, linktocpage=false, pdfborder={0 0 0}, pdfstartpage=3, pdfstartview=FitV,%
+    breaklinks=true, pdfpagemode=UseNone, pageanchor=true, pdfpagemode=UseOutlines,%
+    plainpages=false, bookmarksnumbered, bookmarksopen=true, bookmarksopenlevel=1,%
+    hypertexnames=true, pdfhighlight=/O,%nesting=true,%frenchlinks,%
+    urlcolor=myred, linkcolor=myblue, citecolor=mygreen,
+    %pagecolor=RoyalBlue,% urlcolor=Black, linkcolor=Black, citecolor=Black, %pagecolor=Black,%
+    pdftitle={},%
+    pdfauthor={}%, \myUniversity},%
+    pdfsubject={},%
+    pdfkeywords={},%
+    pdfcreator={pdfLaTeX},%
+    pdfproducer={LaTeX with hyperref}
+}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{
+  \normalfont\normalsize
+  \textsc{
+    INF5400 --- Machine Learning for Image Analysis \\
+    Department of Informatics, University of Oslo \\
+    2019
+    } \\ [25pt]
+  \horrule{0.5pt} \\[0.4cm]
+  \huge Exercise week 12: Unsupervised learning \\
+  \horrule{2pt} \\[0.5cm]
+}
+
+\author{} % Your name
+
+%\date{\normalsize\today} % Today's date or a custom date
+\date{}
+
+\begin{document}
+
+\maketitle % Print the title
+
+\noindent In this exercise, you are to implement autoencoders, a variational autoencoder, and t-SNE in PyTorch.
+
+This assignment text will tell you what to do, but not how to do it. If you are stuck, you can look
+at the accompanying solution proposal. If you want, you can of course experiment by changing
+configurations, the ones specified here are known to work, but are probably far from ideal.
+
+\section*{Task 1: Autoencoders}
+
+\noindent In this task, you should implement a basic autoencoder, and test it out on MNIST images. You should
+implement three versions, a ``compression autoencoder'', a ``denoising autoencoder'', and a
+``sparse autoencoder'' (see the lecture slides~\footnotemark[1])
+All variants can share the same configurations and network architecture, and differs only in their
+particularities.
+
+\footnotetext[1]{\url{https://www.uio.no/studier/emner/matnat/ifi/IN5400/v19/material/week12/slides_in5400_s19_week12.pdf}}
+
+The network consist of four fully-connected layers: 784 nodes in the input layer ($784 = 28\times28$,
+which is the spatial dimension of MNIST images), 128 nodes in the first hidden layer of the
+encoder, 32 nodes in the coding layer (or latent layer), 128 nodes in the first hidden layer of the
+decoder, and 784 nodes in the output layer. You can use sigmoid activation functions on all layers
+(including the last).
+
+For the reconstruction loss, you can use the mean squared error between the network output and the
+network input. Use the Adam optimization method with a learning rate of 0.01, and train the network
+for 50 epochs (this should be sufficient) using a batch size of 256. Also, remember to store
+checkpoints of the training progression as you should run inference on trained models.
+
+\subsection*{Task 1.1: Compression autoencoder}
+
+\noindent Implement a compression autoencoder. A compression autoencoder has the characteristic bottleneck
+structure, and is what was explained above.
+
+\subsection*{Task 1.2: Denoising autoencoder}
+
+\noindent Use your autoencoder to denoise images. You can use the same implementation as in the compression
+autoencoder, only that you add some noise to the input examples, and compare the reconstructed
+images with the corresponding images without noise. For generating noisy images, you could sample
+random vectors of the same size as the input image, and add them to the the input image. Normal
+distributed with a mean of 0 and standard deviation of 0.2 is sufficient for this demonstration
+(assuming the values of the input images has been scaled to be in the range of 0 to 1).
+
+\subsection*{Task 1.3: Sparse autoencoder}
+
+\noindent Implement the sparse autoencoder version. For this, you need to add an additional regularizer to
+the cost function, otherwise the network should be the same. For the sparsity ($\rho$ in the
+lecture slides) you can use a value of 0.01.
+
+\section*{Task 2: Variational autoencoder}
+
+\noindent Implement a variational autoencoder. You can reuse most of the code used for the standard
+autoencoders. Remember that the encoder is used to produce the mean and standard deviation of a
+standard normal distribution.
+
+As in the autoencoder, we use a simple fully connected network. The encoder should have 784 nodes
+in the input layer, 128 nodes in the first hidden layer, and 64 nodes in the second hidden layer.
+In the latent layer, use 10 nodes for the mean vector and 10 nodes for the standard deviation
+vector. Sample a vector of size 10 from a standard normal distribution, and use it together with
+the mean and standard deviation from the latent layer. This random vector of size 10 is then the
+input to the first hidden layer of the decoder. Use 64 nodes for the first hidden layer of the
+decoder, 128 nodes for the second hidden layer in the decoder, and 784 nodes for the output layer
+of the encoder. Use relu activations everywhere, except for the latent layer where you use the
+identity function, and the final layer of the decoder where you use the sigmoid activation.
+
+For the reconstruction loss, you can use the mean of the pixelwise cross entropy between the
+network output and the network input. For the regularising latent loss, you can use a
+regularisation strength of 0.001, so that
+\texttt{loss = reconstruction\_loss + 0.001 * latent\_loss}. Use the Adam optimisation method with
+a learning rate of 0.0001, and train the network for 50 epochs using a batch size of 128. Try to
+use a trained variational autoencoder to reconstruct the input (as with the standard autoencoders),
+generate new examples, and interpolate between examples.
+
+\section*{Task 3: t-SNE}
+
+\noindent Implement t-SNE and apply it on a subset of MNIST\@. Below follows a brief walkthrough
+with pseudocode. First, load some MNIST images
+%
+\begin{lstlisting}
+data_loader = torch.utils.data.DataLoader(
+    torchvision.datasets.MNIST(
+        data_path, # TODO: Specify num_images
+        train=True,
+        download=True,
+        transform=torchvision.transforms.Compose([torchvision.transforms.ToTensor()]),
+        ),
+    batch_size=num_images, # TODO: Specify num_images
+    shuffle=False,
+    )
+images, labels = next(iter(data_loader))
+images = images.view(-1, 28 * 28)
+\end{lstlisting}
+%
+\noindent Then, initialise the set of map points (the 2D points corresponding to the input images) at random.
+Note that these are the variables that are updated each iteration of the method.
+%
+\begin{lstlisting}
+map_points = torch.randn(
+    num_images, # TODO: Specify num_images (same as above)
+    2,
+    device=device, # TODO: Specify device, normally 'cpu' or 'cuda:0'
+    dtype=torch.float,
+    requires_grad=True,
+    )
+\end{lstlisting}
+%
+\noindent Then, simply run the method as long as you like (\texttt{num\_iterations}).
+%
+\begin{lstlisting}
+for iteration in range(1, num_iterations + 1): # TODO: Specify num_iterations
+    p_ij = symmetric_gauss_neighbour_probability() # TODO: Implement this
+    q_ij = symmetric_student_t_neighbour_probability() # TODO: Implement this
+    loss = (p_ij * (p_ij/q_ij).log()).sum()
+    loss.backward()
+
+    with torch.no_grad():
+        map_points -= learning_rate * map_points.grad # TODO: Specify learning_rate
+        map_points.grad.zero_()
+\end{lstlisting}
+
+\subsection*{Task 3.1: Implement t-SNE}
+
+\noindent Implement the functions computing \texttt{p\_ij} and \texttt{q\_ij}. For simplicity, use
+a fixed $\sigma_i = \sigma$ for all datapoints. (Implementing binary search to find an appropriate
+$\sigma_i$ is a bit cumbersome and is not the main focus of this exercise, but if you have time,
+you can of course try to implement it.)
+
+Test your implementation with 1000 images, a learning rate of 10, and a fixed $\sigma = 10$. See
+\texttt{tsne\_sgd\_animation.gif} at the materials page for week 12 for an illustration of the first
+700 steps.
+
+\subsection*{Task 3.2: Substitute optimisation method}
+
+\noindent Substitute the stochastic gradient descent update with an Adam optimizer, and test it
+with a learning rate of 0.1 (feel free to use the pattern
+\texttt{optimizer = torch.optim.Adam([map\_points], lr=learning\_rate)}). See
+\texttt{tsne\_adam\_animation.gif} at the materials page for week 12 for an illustration of the
+first 700 steps.
+
+%\newpage
+%
+%\begin{thebibliography}{9}
+%
+%  \bibitem{lecun2015}
+%    LeCun, Y., Bengio, Y. and Hinton, G. E. (2015).
+%    \emph{Deep Learning}
+%    Nature, Vol. 521, pp 436-444.
+%
+%\end{thebibliography}
+
+\end{document}
